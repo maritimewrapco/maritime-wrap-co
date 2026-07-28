@@ -14,6 +14,20 @@
   gtag('js', new Date());
   gtag('config', 'AW-18339107903');
 
+  var lead = JSON.parse(sessionStorage.getItem('mwc_lead') || 'null');
+  if (lead) {
+    var nameParts = lead.name.trim().split(/\s+/);
+    gtag('set', 'user_data', {
+      email: lead.email,
+      phone_number: lead.phone,
+      address: {
+        first_name: nameParts[0] || '',
+        last_name: nameParts.slice(1).join(' ') || ''
+      }
+    });
+    sessionStorage.removeItem('mwc_lead');
+  }
+
   gtag('event', 'conversion', {'send_to': 'AW-18339107903/45EVCMOQn9gcEL-o4qhE'});
 </script>
 
