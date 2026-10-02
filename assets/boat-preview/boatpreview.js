@@ -3,7 +3,7 @@
    so it matches the selected film's hex exactly; gloss/satin/metallic reflections sit on top. */
 (function(){
   const BASE='assets/boat-preview/';
-  const META={SMAX:2.3,EMAX:0.16,W:1200,H:477,BB:[35,124,1130,341]};
+  const META={SMAX:2.3,EMAX:0.16,W:1200,H:477,BB:[35,124,1135,341]};
   const PCT={matte:50,satin:45,gloss:30,metal:35};
   let ready=null, data=null, pending=null;
   const lin=v=>{v/=255;return v<=0.04045?v/12.92:Math.pow((v+0.055)/1.055,2.4)};
