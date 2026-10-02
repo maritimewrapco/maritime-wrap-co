@@ -18,8 +18,8 @@
   if (lead) {
     var nameParts = lead.name.trim().split(/\s+/);
     gtag('set', 'user_data', {
-      email: lead.email,
-      phone_number: lead.phone,
+      email: (lead.email || '').trim().toLowerCase(),
+      phone_number: (function (p) { var d = (p || '').replace(/\D/g, ''); if (d.length === 10) d = '1' + d; return d ? '+' + d : ''; })(lead.phone),
       address: {
         first_name: nameParts[0] || '',
         last_name: nameParts.slice(1).join(' ') || ''
