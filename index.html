@@ -1154,6 +1154,7 @@ footer{
 <a href="#about">About</a>
 <a href="#process">Process</a>
 <a href="#gallery">Gallery</a>
+<a href="#motion">Videos</a>
 <a href="#colors">Boat Colors</a>
 <a href="#interior-wraps">Interiors</a>
 <a href="#partners">Partners</a>
@@ -1207,27 +1208,51 @@ footer{
 </div>
 </div>
 <div aria-hidden="true" class="mwc-reference-art ref-process" style="background-image:url('assets/process.webp')"></div></section>
-<section class="section" id="before-after">
+<style id="mwcMotionReelStyles">
+#motion{position:relative;z-index:2}
+.mwc-reel{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px}
+.mwc-reel-card{position:relative;margin:0;aspect-ratio:9/16;border-radius:14px;overflow:hidden;border:1px solid var(--line);background:#050a10;cursor:pointer}
+.mwc-reel-card video{width:100%;height:100%;object-fit:cover;display:block}
+.mwc-reel-card.paused::after{content:"▶";position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:48px;height:48px;border-radius:50%;background:rgba(0,0,0,.55);color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;pointer-events:none}
+@media(max-width:1000px){.mwc-reel{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:640px){.mwc-reel{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:10px;padding-bottom:6px;-webkit-overflow-scrolling:touch}.mwc-reel-card{flex:0 0 62%;scroll-snap-align:start}}
+</style>
+<section class="section" id="motion">
 <div class="container">
 <div class="gallery-title">
-<div class="eyebrow">Before &amp; After</div>
-<h2>See The Transformation</h2>
+<div class="eyebrow">In Motion</div>
+<h2>Wraps in Motion</h2>
 </div>
-<div class="compare-wrap">
-<div class="compare-slider" id="compareSlider">
-<img alt="Boat before wrap" draggable="false" src="assets/img/3681cc170a1d.jpg"/>
-<div class="after-wrap" id="afterWrap">
-<img alt="Boat after wrap" draggable="false" src="assets/img/88e13ffb08df.jpg"/>
-</div>
-<div class="divider" id="cmpDivider"></div>
-<div class="handle" id="cmpHandle">↔</div>
-<span class="cmp-label before">Before</span>
-<span class="cmp-label after">After</span>
-<input aria-label="Drag to compare before and after" class="compare-range" id="compareRange" max="100" min="0" type="range" value="50"/>
+<div class="mwc-reel">
+<figure class="mwc-reel-card"><video aria-label="Hull wrap install" loop muted playsinline poster="assets/videos/hull-install.webp" preload="none" src="assets/videos/hull-install.mp4"></video></figure>
+<figure class="mwc-reel-card"><video aria-label="Center console wrap" loop muted playsinline poster="assets/videos/center-console.webp" preload="none" src="assets/videos/center-console.mp4"></video></figure>
+<figure class="mwc-reel-card"><video aria-label="Yacht bow wrap" loop muted playsinline poster="assets/videos/yacht-bow.webp" preload="none" src="assets/videos/yacht-bow.mp4"></video></figure>
+<figure class="mwc-reel-card"><video aria-label="Catamaran wrap" loop muted playsinline poster="assets/videos/catamaran.webp" preload="none" src="assets/videos/catamaran.mp4"></video></figure>
+<figure class="mwc-reel-card"><video aria-label="Hull wrap close-up" loop muted playsinline poster="assets/videos/hull-surface.webp" preload="none" src="assets/videos/hull-surface.mp4"></video></figure>
+<figure class="mwc-reel-card"><video aria-label="Interior woodgrain wrap" loop muted playsinline poster="assets/videos/interior-woodgrain.webp" preload="none" src="assets/videos/interior-woodgrain.mp4"></video></figure>
 </div>
 </div>
-</div>
-<div aria-hidden="true" class="mwc-reference-art ref-before-after" style="background-image:url('assets/before-after.webp')"></div></section>
+</section>
+<script id="mwcMotionReelScript">
+(() => {
+  const cards=[...document.querySelectorAll(".mwc-reel-card")];
+  const still=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const play=c=>{const v=c.querySelector("video");v.play().then(()=>c.classList.remove("paused")).catch(()=>c.classList.add("paused"))};
+  const pause=c=>{c.querySelector("video").pause();c.classList.add("paused")};
+  cards.forEach(c=>{
+    c.classList.add("paused");
+    c.addEventListener("click",()=>{c.dataset.manual="1";c.querySelector("video").paused?play(c):pause(c)});
+  });
+  // Autoplay clips only while they are on screen; reduced-motion visitors tap to play
+  if(still||!("IntersectionObserver" in window))return;
+  const io=new IntersectionObserver(es=>es.forEach(e=>{
+    const c=e.target;if(c.dataset.manual)return;
+    e.isIntersecting?play(c):pause(c);
+  }),{threshold:.35});
+  cards.forEach(c=>io.observe(c));
+})();
+</script>
+
 <section class="section" id="gallery">
 <div class="container">
 <div class="gallery-title">
@@ -1357,6 +1382,21 @@ footer{
 <span class="mwc-merged-kicker">Yacht Interior Finish Library</span>
 <h2>One finish library for the whole vessel.</h2>
 <p>Browse architectural finishes for salons, galleys, helms, cabinetry, bulkheads, consoles, staterooms, furniture, millwork and built-ins.</p>
+</div>
+<style id="mwcInteriorWorkStyles">
+.mwc-interior-work{max-width:1100px;margin:0 auto;padding:26px 22px 8px}
+.mwc-interior-work h3{text-align:center;margin:0 0 16px;font-size:clamp(1.1rem,2vw,1.4rem);letter-spacing:.06em;text-transform:uppercase}
+.mwc-iw-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.mwc-iw-item{aspect-ratio:3/4;border-radius:14px;border:1px solid rgba(255,255,255,.1)}
+@media(max-width:640px){.mwc-iw-grid{gap:8px}.mwc-interior-work{padding:20px 12px 4px}}
+</style>
+<div class="mwc-interior-work">
+<h3>Our Interior Work</h3>
+<div class="mwc-iw-grid">
+<button class="gallery-item mwc-iw-item" data-full="assets/interior-work/helm-counter-granite.webp" type="button"><img alt="Helm station counter wrapped in a granite finish with woodgrain trim" loading="lazy" src="assets/interior-work/helm-counter-granite-thumb.webp"/></button>
+<button class="gallery-item mwc-iw-item" data-full="assets/interior-work/shower-marble.webp" type="button"><img alt="Yacht shower walls wrapped in a marble finish" loading="lazy" src="assets/interior-work/shower-marble-thumb.webp"/></button>
+<button class="gallery-item mwc-iw-item" data-full="assets/interior-work/vanity-marble.webp" type="button"><img alt="Yacht vanity and sink wrapped in a marble finish" loading="lazy" src="assets/interior-work/vanity-marble-thumb.webp"/></button>
+</div>
 </div>
 <section class="mwc-finish-library" id="interior-finishes">
 <div class="mwc-finish-shell">
