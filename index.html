@@ -325,6 +325,11 @@ footer{padding:22px 0 28px;background:#01050b;color:#7990a9;text-align:center;fo
 .color-preview{position:sticky;top:94px;background:linear-gradient(180deg,rgba(8,25,49,.7),rgba(3,12,26,.85));border:1px solid var(--line);border-radius:var(--radius);padding:26px;text-align:center}
 .color-preview svg{width:100%;height:auto;max-width:620px;filter:drop-shadow(0 18px 26px rgba(0,0,0,.45))}
 .color-preview-info{margin-top:16px}
+.boat-photo-preview{position:relative;border-radius:14px;overflow:hidden;background:#0b1622 url(assets/boat-preview/base.webp) center/cover no-repeat;aspect-ratio:1200/477;box-shadow:0 18px 30px rgba(0,0,0,.4)}
+.boat-photo-preview canvas{display:block;width:100%;height:100%;transition:opacity .25s}
+.boat-photo-preview canvas.is-loading{opacity:.55}
+.boat-photo-note{color:#8fa7c2;font-size:.72rem;line-height:1.45;margin:10px 4px 0}
+.color-preview > svg{display:none}
 .color-preview-swatch{width:24px;height:24px;border-radius:50%;display:inline-block;vertical-align:middle;margin-right:10px;border:2px solid rgba(255,255,255,.35)}
 .color-preview-name{font-weight:800;text-transform:uppercase;letter-spacing:.04em;font-size:.95rem;vertical-align:middle}
 .color-preview-meta{color:#8fa7c2;font-size:.78rem;margin-top:6px}
@@ -1306,6 +1311,8 @@ footer{
 </div>
 <div class="colors-layout">
 <div class="color-preview">
+<div class="boat-photo-preview"><canvas aria-label="Selected wrap color shown on a center console boat" height="477" id="boatPhotoCanvas" role="img" width="1200"></canvas></div>
+<p class="boat-photo-note">Shown on a real center console in Florida sun. Each color is matched to the manufacturer's own swatch; always confirm with a physical sample before you order.</p>
 <svg aria-label="Maritime Wrap Co. logo boat color preview" role="img" viewbox="-20 -20 1115 440" xmlns="http://www.w3.org/2000/svg">
 <defs>
 <mask height="400" id="exactLogoBoatMask" maskunits="userSpaceOnUse" style="mask-type:alpha" width="1075" x="0" y="0">
@@ -1707,6 +1714,7 @@ const VINYL_COLORS=[{"brand":"3M","line":"2080 Wrap Film","name":"Matte White","
   const grid = document.getElementById('colorGrid');
   const countEl = document.getElementById('colorCount');
   const boatHull = document.getElementById('boatHull');
+  const boatPhoto = document.getElementById('boatPhotoCanvas');
   const boatHullSheen = document.getElementById('boatHullSheen');
   const boatHullHotspot = document.getElementById('boatHullHotspot');
   const boatTopDetails = document.getElementById('boatTopDetails');
@@ -1781,6 +1789,7 @@ const VINYL_COLORS=[{"brand":"3M","line":"2080 Wrap Film","name":"Matte White","
   function selectColor(c, btn){
     const finish = getFinish(c.name);
     boatHull.style.fill = c.hex;
+    if(window.MWCBoatPreview && boatPhoto) MWCBoatPreview.show(boatPhoto, c.hex, c.name, finish);
     if(boatTopDetails) boatTopDetails.style.fill = c.hex;
     if(boatVectorDetails) boatVectorDetails.style.color = c.hex;
     applySheen(finish);
@@ -1860,6 +1869,7 @@ const VINYL_COLORS=[{"brand":"3M","line":"2080 Wrap Film","name":"Matte White","
     const hex = opt.dataset.hex;
     const finish = getFinish(opt.textContent);
     boatHull.style.fill = hex;
+    if(window.MWCBoatPreview && boatPhoto) MWCBoatPreview.show(boatPhoto, hex, opt.textContent, finish);
     if(boatTopDetails) boatTopDetails.style.fill = hex;
     if(boatVectorDetails) boatVectorDetails.style.color = hex;
     applySheen(finish);
@@ -1985,5 +1995,6 @@ if(quoteForm){
   });
 }
 </script>
+<script defer src="assets/boat-preview/boatpreview.js"></script>
 </body>
 </html>
