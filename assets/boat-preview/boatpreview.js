@@ -9,6 +9,11 @@
   const lin=v=>{v/=255;return v<=0.04045?v/12.92:Math.pow((v+0.055)/1.055,2.4)};
   const LUT=new Float32Array(256);for(let i=0;i<256;i++)LUT[i]=lin(i);
   const toS=v=>{const x=Math.max(0,v);return x<=0.0031308?x*12.92:1.055*Math.pow(x,1/2.4)-0.055};
+  // Soft highlight roll-off instead of a hard clip at white, so light films keep the hull's shading.
+  const EXPOSURE=0.68;
+  const KNEE=0.8;
+  const shoulder=x=>x<=KNEE?x:KNEE+(1-KNEE)*(1-Math.exp(-(x-KNEE)/(1-KNEE)));
+  const unshoulder=y=>{y=Math.min(y,0.995);return y<=KNEE?y:KNEE-(1-KNEE)*Math.log(1-(y-KNEE)/(1-KNEE))};
   function loadImg(src){return new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=rej;i.src=BASE+src;})}
   function pixels(img){const c=document.createElement('canvas');c.width=img.naturalWidth;c.height=img.naturalHeight;const x=c.getContext('2d',{willReadFrequently:true});x.drawImage(img,0,0);return x.getImageData(0,0,c.width,c.height).data;}
   function load(){
@@ -39,7 +44,9 @@
     if(finish==='satin')return 'satin';return 'gloss';}
   function paint(canvas,hex,name,finish){
     const D=data, f=filmFinish(name||'',finish||'gloss');
-    const c=[1,3,5].map(i=>LUT[parseInt(hex.substr(i,2),16)]);
+    // Film reflectance x this photo's exposure: measured from the sunlit white T-top, console and gunwale cap
+    // (white gelcoat photographs at ~203 here), so every film sits in the scene the way the real boat's whites do.
+    const c=[1,3,5].map(i=>LUT[parseInt(hex.substr(i,2),16)]*EXPOSURE);
     const cmax=Math.max(c[0],c[1],c[2],1e-3);
     const S=D.S[f], pct=PCT[f];
     // extra (reflection) layer, rgb
@@ -49,19 +56,20 @@
       if(f==='metal'){for(let i=0;i<D.n;i++)for(let j=0;j<3;j++)ext[i*3+j]+=D.streak[i]*(c[j]/cmax*0.7+0.3)+D.flake[i]*0.01;}}
     const k=[1,1,1];
     for(let j=0;j<3;j++){
+      const tj=unshoulder(c[j]);   // solve in pre-roll-off space so the rendered tone still lands exactly on the swatch
       const es=new Float32Array(D.sel.length),bs=new Float32Array(D.sel.length);
       for(let t=0;t<D.sel.length;t++){const i=D.sel[t];es[t]=ext[i*3+j];bs[t]=S[i]*c[j]+(f==='metal'?D.flake[i]*0.12*c[j]:0);}
-      let pe=pctl(es,pct);const ef=pe>0.7*c[j]?0.7*c[j]/Math.max(pe,1e-6):1;
+      let pe=pctl(es,pct);const ef=pe>0.7*tj?0.7*tj/Math.max(pe,1e-6):1;
       if(ef!==1){for(let i=0;i<D.n;i++)ext[i*3+j]*=ef;for(let t=0;t<es.length;t++)es[t]*=ef;pe*=ef;}
       let kk=1;const tmp=new Float32Array(bs.length);
       for(let it=0;it<6;it++){for(let t=0;t<bs.length;t++)tmp[t]=bs[t]*kk+es[t];const p=pctl(tmp,pct);
-        kk*=Math.min(2,Math.max(0.5,(c[j]-pe)/Math.max(p-pe,1e-6)));}
+        kk*=Math.min(2,Math.max(0.5,(tj-pe)/Math.max(p-pe,1e-6)));}
       k[j]=kk;}
     const W=META.W,H=META.H;canvas.width=W;canvas.height=H;
     const ctx=canvas.getContext('2d');const img=ctx.createImageData(W,H);const o=img.data;o.set(D.baseRaw);
     for(let y=0;y<D.h;y++)for(let x=0;x<D.w;x++){const i=y*D.w+x,a=D.mask[i];if(a<=0)continue;
       const q=((y+D.y0)*W+(x+D.x0))*4;
-      for(let j=0;j<3;j++){let v=S[i]*c[j]*k[j]+(f==='metal'?D.flake[i]*0.12*c[j]*k[j]:0)+ext[i*3+j];v=Math.min(1,Math.max(0,v));
+      for(let j=0;j<3;j++){let v=S[i]*c[j]*k[j]+(f==='metal'?D.flake[i]*0.12*c[j]*k[j]:0)+ext[i*3+j];v=shoulder(Math.max(0,v));
         const b=D.baseLin[q+j];o[q+j]=Math.round(toS(b*(1-a)+v*a)*255);}}
     ctx.putImageData(img,0,0);
   }
