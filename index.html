@@ -1538,12 +1538,9 @@ footer{
 <h2>Tell Us About Your Boat</h2>
 <p style="max-width:640px;margin:0 auto">Fill out the form below with your boat's details and what you're looking for. We'll follow up with a custom quote.</p>
 </div>
-<form action="https://formsubmit.co/maritimewrapco@gmail.com" class="quote-form" enctype="multipart/form-data" method="POST">
+<form action="https://formspree.io/f/mgaakjzw" class="quote-form" method="POST">
 <input name="_subject" type="hidden" value="New Boat Wrap Quote Request"/>
-<input name="_template" type="hidden" value="table"/>
-<input name="_captcha" type="hidden" value="true"/>
-<input type="hidden" name="_next" value="https://www.maritimewrapco.com/thank-you.html">
-<input autocomplete="off" name="_honey" style="display:none" tabindex="-1" type="text"/>
+<input autocomplete="off" name="_gotcha" style="display:none" tabindex="-1" type="text"/>
 <div class="quote-form-grid">
 <div>
 <label for="qf-name">Full Name</label>
@@ -1599,10 +1596,6 @@ footer{
 <div class="full">
 <label for="qf-details">Tell Us More</label>
 <textarea id="qf-details" name="Details" placeholder="Design ideas, timeline, current hull color, etc."></textarea>
-</div>
-<div class="full field-file">
-<label for="qf-photos">Boat Photos (optional)</label>
-<input accept="image/*" id="qf-photos" multiple="" name="Boat Photos" type="file"/>
 </div>
 </div>
 <button class="btn btn-primary" type="submit">Submit Quote Request</button>
@@ -1990,12 +1983,24 @@ const VINYL_COLORS=[{"brand":"3M","line":"2080 Wrap Film","name":"Matte White","
 
 const quoteForm=document.querySelector('.quote-form');
 if(quoteForm){
-  quoteForm.addEventListener('submit',()=>{
-    sessionStorage.setItem('mwc_lead',JSON.stringify({
+  quoteForm.addEventListener('submit',async(e)=>{
+    try{sessionStorage.setItem('mwc_lead',JSON.stringify({
       name:document.getElementById('qf-name').value,
       email:document.getElementById('qf-email').value,
       phone:document.getElementById('qf-phone').value
-    }));
+    }));}catch(err){}
+    if(!window.fetch)return;
+    e.preventDefault();
+    const btn=quoteForm.querySelector('button[type="submit"]');
+    if(btn){btn.disabled=true;btn.textContent='Sending...';}
+    try{
+      const res=await fetch(quoteForm.action,{method:'POST',body:new FormData(quoteForm),headers:{'Accept':'application/json'}});
+      if(res.ok){window.location.href='thank-you.html';return;}
+      throw new Error('Formspree '+res.status);
+    }catch(err){
+      if(btn){btn.disabled=false;btn.textContent='Submit Quote Request';}
+      alert('Sorry, your request did not go through. Please call or text (251) 458-4561, or email maritimewrapco@gmail.com.');
+    }
   });
 }
 </script>
